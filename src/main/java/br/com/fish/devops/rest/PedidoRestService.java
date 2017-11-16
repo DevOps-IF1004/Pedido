@@ -1,5 +1,10 @@
 package br.com.fish.devops.rest;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,7 +32,7 @@ import br.com.fish.devops.dto.pedido.ItemPedidoDTO;
 @Named
 @Path("/pedidorest/")
 public class PedidoRestService {
- 
+
 	private static List<Pedido> pedidosMock = new ArrayList<Pedido>();
 
 	private static final Logger logger = LogManager.getLogger(PedidoRestService.class.getName());
@@ -68,7 +73,7 @@ public class PedidoRestService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void adicionaItemPedido(ItemPedidoDTO item) {
 		boolean temProduto = false;
-		
+
 		contadorErroCaotico++;
 
 		if ((contadorErroCaotico) % 7 == 0) {
@@ -76,6 +81,31 @@ public class PedidoRestService {
 		}
 
 		// se for pedido novo, cria, senao somente adiciona o item
+
+		URL url;
+		try {
+			url = new URL("http://localhost:8081/clienterest/cliente?id="+item.getIdCliente());
+			try {
+				HttpURLConnection conexao = (HttpURLConnection) url.openConnection();
+				try {
+					conexao.setRequestMethod("GET");
+				} catch (ProtocolException e) {
+					e.printStackTrace();
+				}
+				try {
+					if (conexao.getResponseCode() == 404) {
+						throw new RuntimeException("Cliente Não Existe!");
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		} catch (MalformedURLException e2) {
+			e2.printStackTrace();
+		}
+
 
 		long idCliente = 0;
 
@@ -92,11 +122,11 @@ public class PedidoRestService {
 						logger.info("Foi pedido + "+item.getItem().getQuantidade()+" quantidades do produto " +item.getIdPedido());
 					}
 				}
-				
-			if(!temProduto) {
-				pedido.getItems().add(item.getItem());
-			}
-			
+
+				if(!temProduto) {
+					pedido.getItems().add(item.getItem());
+				}
+
 				idCliente = pedido.getIdCliente();
 
 				pedidoNovo = false;
