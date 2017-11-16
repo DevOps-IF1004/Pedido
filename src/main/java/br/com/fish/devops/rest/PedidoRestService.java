@@ -18,6 +18,8 @@ import javax.ws.rs.core.MediaType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+
+import br.com.fish.devops.domain.pedido.ItemPedido;
 import br.com.fish.devops.domain.pedido.Pedido;
 import br.com.fish.devops.domain.pedido.StatusPedido;
 import br.com.fish.devops.dto.pedido.ItemPedidoDTO;
@@ -65,7 +67,8 @@ public class PedidoRestService {
 	@Path("item/adiciona")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void adicionaItemPedido(ItemPedidoDTO item) {
-
+		boolean temProduto = false;
+		
 		contadorErroCaotico++;
 
 		if ((contadorErroCaotico) % 7 == 0) {
@@ -81,8 +84,19 @@ public class PedidoRestService {
 		for (Pedido pedido : pedidosMock) {
 
 			if (pedido.getId() == item.getIdPedido()) {
+				for(ItemPedido objeto : pedido.getItems()) {
+					if(objeto.getIdProduto() == item.getItem().getIdProduto()) {
+						long aux = objeto.getQuantidade() + item.getItem().getQuantidade();
+						objeto.setQuantidade(aux);
+						temProduto = true;
+						logger.info("Foi pedido + "+item.getItem().getQuantidade()+" quantidades do produto " +item.getIdPedido());
+					}
+				}
+				
+			if(!temProduto) {
 				pedido.getItems().add(item.getItem());
-
+			}
+			
 				idCliente = pedido.getIdCliente();
 
 				pedidoNovo = false;
