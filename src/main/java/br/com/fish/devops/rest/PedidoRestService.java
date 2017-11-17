@@ -84,7 +84,7 @@ public class PedidoRestService {
 
 		URL url;
 		try {
-			url = new URL("http://localhost:8081/clienterest/cliente?id="+item.getIdCliente());
+			url = new URL("http://localhost:8090/clienterest/cliente?id="+item.getIdCliente());
 			try {
 				HttpURLConnection conexao = (HttpURLConnection) url.openConnection();
 				try {
