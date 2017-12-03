@@ -11,7 +11,7 @@ node {
          sh "'${mvnHome}/bin/mvn' test"
    }
 
-    stage('Build image Pedido") {
+    stage('Build image Pedido') {
         app = docker.build("tas4/pedido")
     }
     
